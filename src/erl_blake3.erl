@@ -2,10 +2,11 @@
 
 %% API
 -export([hash/1,
-         hash_as_bytes/1,
-         %% new_hasher/0,
-         %% update/2,
-         %% finalize/1
+         as_bytes/1,
+         to_hex/1,
+         new/0,
+         update/2,
+         finalize/1
         ]).
 
 %% Native lib support
@@ -16,7 +17,19 @@
 hash(_Data) ->
     not_loaded(?LINE).
 
-hash_as_bytes(Hash) ->
+as_bytes(_Hash) ->
+    not_loaded(?LINE).
+
+to_hex(_Hash) ->
+    not_loaded(?LINE).
+
+new() ->
+    not_loaded(?LINE).
+
+update(_Hasher, _Data) ->
+    not_loaded(?LINE).
+
+finalize(_Hasher) ->
     not_loaded(?LINE).
 
 load() ->

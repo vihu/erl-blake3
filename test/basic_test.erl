@@ -5,18 +5,18 @@
 example_test() ->
     {ok, AllAtOnceHash} = erl_blake3:hash("foobarbaz"),
 
-    {ok, Hasher0} = erl_blake3:new_hasher(),
+    {ok, Hasher0} = erl_blake3:new(),
     ?assert(is_reference(Hasher0)),
 
-    {ok, {Hasher1, Hash1}} = erl_blake3:update(Hasher0, "foo"),
+    {ok, Hasher1} = erl_blake3:update(Hasher0, "foo"),
     ?assert(is_reference(Hasher1)),
 
-    {ok, {Hasher2, Hash2}} = erl_blake3:update(Hasher1, "bar"),
+    {ok, Hasher2} = erl_blake3:update(Hasher1, "bar"),
     ?assert(is_reference(Hasher2)),
 
-    {ok, {Hasher3, Hash3}} = erl_blake3:update(Hasher2, "baz"),
+    {ok, Hasher3} = erl_blake3:update(Hasher2, "baz"),
     ?assert(is_reference(Hasher3)),
 
     {ok, FinalHash} = erl_blake3:finalize(Hasher3),
 
-    ?assertEqual(AllAtOnceHash, FinalHash).
+    ?assertEqual(erl_blake3:to_hex(AllAtOnceHash), erl_blake3:to_hex(FinalHash)).
