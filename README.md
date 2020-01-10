@@ -1,9 +1,14 @@
 erl_blake3
 =====
 
-An OTP library
+Erlang bindings for [BLAKE3](https://github.com/BLAKE3-team/BLAKE3).
 
 Build
 -----
 
-    $ rebar3 compile
+    $ make
+
+Test
+-----
+
+    $ make test
