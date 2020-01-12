@@ -13,22 +13,27 @@
 -export([load/0]).
 -on_load(load/0).
 
--spec hash(Data :: binary())-> {ok, binary()} | {error, any()}.
+-spec hash(Data :: binary())-> {ok, reference()} | {error, any()}.
 hash(_Data) ->
     not_loaded(?LINE).
 
+-spec as_bytes(Hash :: reference())-> {ok, binary()} | {error, any()}.
 as_bytes(_Hash) ->
     not_loaded(?LINE).
 
+-spec to_hex(Hash :: reference())-> {ok, binary()} | {error, any()}.
 to_hex(_Hash) ->
     not_loaded(?LINE).
 
+-spec new()-> {ok, reference()} | {error, any()}.
 new() ->
     not_loaded(?LINE).
 
+-spec update(Hasher :: reference(), Data :: binary())-> {ok, reference()} | {error, any()}.
 update(_Hasher, _Data) ->
     not_loaded(?LINE).
 
+-spec finalize(Hasher :: reference())-> {ok, reference()} | {error, any()}.
 finalize(_Hasher) ->
     not_loaded(?LINE).
 
