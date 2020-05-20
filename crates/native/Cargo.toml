@@ -11,5 +11,5 @@ name = "native"
 crate-type = ["dylib"]
 
 [dependencies]
-rustler = ">=0.13.0"
+rustler = { git = "https://github.com/rusterlium/rustler.git", branch = "master" }
 blake3 = "0.3.2"
