@@ -2,28 +2,24 @@ extern crate blake3;
 
 extern crate rustler;
 
-use rustler::{Encoder, Env, Error, Term};
+use rustler::{Env, Term};
 use rustler::resource::ResourceArc;
+use rustler::types::Atom;
 use blake3::{Hash, Hasher};
 
-mod atoms {
-    rustler::rustler_atoms! {
-        atom ok;
-        atom error;
-    }
-}
+mod atoms;
 
-rustler::rustler_export_nifs!(
+rustler::init!(
     "erl_blake3",
     [
-        ("hash", 1, hash),
-        ("as_bytes", 1, as_bytes),
-        ("to_hex", 1, to_hex),
-        ("new", 0, new),
-        ("update", 2, update),
-        ("finalize", 1, finalize)
+        hash,
+        as_bytes,
+        to_hex,
+        new,
+        update,
+        finalize
     ],
-    Some(on_load)
+    load=on_load
 );
 
 struct HashResource {
@@ -34,64 +30,65 @@ struct HasherResource {
     pub hasher: Hasher,
 }
 
+
 fn on_load(env: Env, _info: Term) -> bool {
-    rustler::resource_struct_init!(HashResource, env);
-    rustler::resource_struct_init!(HasherResource, env);
+    rustler::resource!(HashResource, env);
+    rustler::resource!(HasherResource, env);
     // rustler::resource_struct_init!(DecoderResource, env);
     true
 }
 
-fn hash<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
-    let data: Vec<u8> = args[0].decode()?;
+#[rustler::nif]
+fn hash(data: Vec<u8>) -> (Atom, ResourceArc<HashResource>) {
     let hash = blake3::hash(&data);
     let res = ResourceArc::new(HashResource {
-        hash: hash
+        hash
     });
 
-    Ok((atoms::ok(), res).encode(env))
+    (atoms::ok(), res)
 }
 
-fn as_bytes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
-    let hash_resource: ResourceArc<HashResource> = args[0].decode()?;
-    let hash = hash_resource.hash;
-    let bytes = Hash::as_bytes(&hash);
+#[rustler::nif]
+fn as_bytes(hash_resource: ResourceArc<HashResource>) -> (Atom, Vec<u8>) {
+    let h = hash_resource.hash;
+    let bytes = Hash::as_bytes(&h);
     let bytes_vec = bytes.to_vec();
-    Ok((atoms::ok(), bytes_vec).encode(env))
+    (atoms::ok(), bytes_vec)
 }
 
-fn to_hex<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
-    let hash_resource: ResourceArc<HashResource> = args[0].decode()?;
-    let hash = hash_resource.hash;
-    let arr_str = Hash::to_hex(&hash);
+#[rustler::nif]
+fn to_hex(hash_resource: ResourceArc<HashResource>) -> (Atom, String) {
+    let h = hash_resource.hash;
+    let arr_str = Hash::to_hex(&h);
     let arr_vec = arr_str.as_str();
-    Ok((atoms::ok(), arr_vec).encode(env))
+    (atoms::ok(), String::from(arr_vec))
 }
 
-fn new<'a>(env: Env<'a>, _args: &[Term<'a>]) -> Result<Term<'a>, Error> {
+#[rustler::nif]
+fn new() -> (Atom, ResourceArc<HasherResource>) {
     let hasher = blake3::Hasher::new();
     let res = ResourceArc::new(HasherResource {
-        hasher: hasher
+        hasher
     });
-    Ok((atoms::ok(), res).encode(env))
+    (atoms::ok(), res)
 }
 
-fn update<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
-    let hasher_resource: ResourceArc<HasherResource> = args[0].decode()?;
-    let data: Vec<u8> = args[1].decode()?;
+#[rustler::nif]
+fn update(hasher_resource: ResourceArc<HasherResource>, data: Vec<u8>) -> (Atom, ResourceArc<HasherResource>) {
     let mut hasher = hasher_resource.hasher.clone();
     hasher.update(&data);
     let res = ResourceArc::new(HasherResource {
-        hasher: hasher
+        hasher
     });
-    Ok((atoms::ok(), res).encode(env))
+    (atoms::ok(), res)
 }
 
-fn finalize<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
-    let hasher_resource: ResourceArc<HasherResource> = args[0].decode()?;
+#[rustler::nif]
+fn finalize(hasher_resource: ResourceArc<HasherResource>) -> (Atom, ResourceArc<HashResource>) {
     let hasher = hasher_resource.hasher.clone();
-    let hash = hasher.finalize();
+    let h = hasher.finalize();
     let res = ResourceArc::new(HashResource {
-        hash: hash
+        hash: h
     });
-    Ok((atoms::ok(), res).encode(env))
+    (atoms::ok(), res)
 }
